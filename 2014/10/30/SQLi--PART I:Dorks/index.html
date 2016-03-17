@@ -1,0 +1,448 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>SQLi--PART I:Dorks |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="PrefaceA method of finding websites vulnerable to SQL injection is using what we call “dorks”.  
+Dorks:They are like search criteria in which a search">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-10-30T09:44:32.000Z" itemprop="datePublished">
+      <a href="/2014/10/30/SQLi--PART I:Dorks/" title="SQLi--PART I:Dorks" itemprop="url" class="article-time">2014-10-30</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/10/30/SQLi--PART I:Dorks/" title="SQLi--PART I:Dorks" itemprop="url"><span>SQLi--PART I:Dorks</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Finding-your-dorks"><span class="toc-number">2.</span> <span class="toc-text">Step1: Finding your dorks</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-compiled-by-kobez"><span class="toc-number">2.1.</span> <span class="toc-text">Dork List compiled by kobez-</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-by-Sidesipe"><span class="toc-number">2.2.</span> <span class="toc-text">Dork List by Sidesipe-</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-by-Newsletter’"><span class="toc-number">2.3.</span> <span class="toc-text">Dork List by .Newsletter’</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Making-use-of-your-Dorks-with-the-help-of-Google"><span class="toc-number">3.</span> <span class="toc-text">Step2: Making use of your Dorks with the help of Google</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-Vulnerability-approach"><span class="toc-number">4.</span> <span class="toc-text">Step3: Vulnerability approach</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extra-Notes-Hunting-for-specific-websites-with-specific-domains"><span class="toc-number">5.</span> <span class="toc-text">Extra Notes: Hunting for specific websites with specific domains</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Some-resource"><span class="toc-number">6.</span> <span class="toc-text">Some resource</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h2><p>A method of finding websites vulnerable to SQL injection is using what we call “dorks”.  </p>
+<p>Dorks:They are like search criteria in which a search engine returns results related to your dork.  </p>
+<p>The process can be a little time consuming, but the outcome will be worth it after learning on how to use dorks.  </p>
+<h2 id="Step1-Finding-your-dorks"><a href="#Step1-Finding-your-dorks" class="headerlink" title="Step1: Finding your dorks"></a>Step1: Finding your dorks</h2><h3 id="Dork-List-compiled-by-kobez"><a href="#Dork-List-compiled-by-kobez" class="headerlink" title="Dork List compiled by kobez-"></a>Dork List compiled by kobez-</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pastebin.com/0FqmasC7</span><br></pre></td></tr></table></figure>
+<h3 id="Dork-List-by-Sidesipe"><a href="#Dork-List-by-Sidesipe" class="headerlink" title="Dork List by Sidesipe-"></a>Dork List by Sidesipe-</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pastebin.com/x1rtqktj</span><br></pre></td></tr></table></figure>
+<h3 id="Dork-List-by-Newsletter’"><a href="#Dork-List-by-Newsletter’" class="headerlink" title="Dork List by .Newsletter’"></a>Dork List by .Newsletter’</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pastebin.com/APxqavu9</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>For this tutorial, we’ll be using this dork “inurl:index.php?id=”</p>
+</blockquote>
+<h2 id="Step2-Making-use-of-your-Dorks-with-the-help-of-Google"><a href="#Step2-Making-use-of-your-Dorks-with-the-help-of-Google" class="headerlink" title="Step2: Making use of your Dorks with the help of Google"></a>Step2: Making use of your Dorks with the help of Google</h2><p><strong>Here’s what you do:  </strong></p>
+<ul>
+<li>Go to <a href="">http://www.google.com</a></li>
+<li>Type the dork in the search bar “inurl:index.php?id=” (with or without quotes)</li>
+<li>Now you’ll find a whole lot of links in your results</li>
+</ul>
+<p><strong>Here’s how you can speed up your process:</strong></p>
+<ul>
+<li>In your mouse, there should be a scroll button right?</li>
+<li>Hover your mouse on each link and hit the scroll button so that it’ll open on a new tab. (Lets say you can open about 10 links at a time)</li>
+</ul>
+<h2 id="Step3-Vulnerability-approach"><a href="#Step3-Vulnerability-approach" class="headerlink" title="Step3: Vulnerability approach"></a>Step3: Vulnerability approach</h2><p>Now to see whether the website is vulnerable to SQL injection or not, we simply put in a quote “ ‘ “ at the end of the url address.<br>So our site will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=123&apos;</span><br></pre></td></tr></table></figure></p>
+<p>Do the same thing with the websites you opened on your tabs and see if there’s any vulnerable website.  </p>
+<p>To determine if a website is vulnerable or not, it should return an error!</p>
+<blockquote>
+<p>Note: If you can’t find any vulnerability after doing some vulnerability search on this dork, you can always browse the dork list I’ve mentioned above and use any of them until you find any website vulnerable to SQL injection  </p>
+</blockquote>
+<h2 id="Extra-Notes-Hunting-for-specific-websites-with-specific-domains"><a href="#Extra-Notes-Hunting-for-specific-websites-with-specific-domains" class="headerlink" title="Extra Notes: Hunting for specific websites with specific domains"></a>Extra Notes: Hunting for specific websites with specific domains</h2><p>Ever want to hack a government website, or an organization website? It’s simple. All you have to do is improvise your dorks.<br>First off, here are some common domains:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.gov = Government websites</span><br><span class="line">.edu = Educational websites</span><br><span class="line">.org = Organizational websites</span><br><span class="line">.com = Commercial websites</span><br><span class="line">.info = Informative websites</span><br><span class="line">.net = Networking websites ( similar to .com)</span><br></pre></td></tr></table></figure></p>
+<p>Alright now you know some specific domains, lets add them to our dork shall we? Follow this formula-like dork.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;inurl:.&quot;domain&quot;/&quot;dorks&quot; &quot;</span><br></pre></td></tr></table></figure></p>
+<p>So you would normally understand it like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&quot;inurl&quot; = input URL</span><br><span class="line">&quot;domain&quot; = your desired domain ex. .gov</span><br><span class="line">&quot;dorks&quot; = your dork of your choice</span><br></pre></td></tr></table></figure></p>
+<h2 id="Some-resource"><a href="#Some-resource" class="headerlink" title="Some resource"></a>Some resource</h2><ul>
+<li><a href="http://www.mediafire.com/download/6d6dvn791wzynsq/Scanners.rar" target="_blank" rel="external">Scanners.rar</a></li>
+<li><a href="http://www.mediafire.com/download/kkje26i4suwdij7/RFI.exe" target="_blank" rel="external">RFI.exe</a></li>
+<li><a href="http://minus.com/mdh8bQM" target="_blank" rel="external">SEKURITY.WS Scanner</a></li>
+<li><a href="http://pastebin.com/kVMYX0Eh" target="_blank" rel="external">SQLi VULNS</a><br><br></li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/A-SQLi/">A-SQLi</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MegaSQLi/">MegaSQLi</a><a href="/tags/Dork/">Dork</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/10/30/SQLi--PART I:Dorks/" data-title="SQLi--PART I:Dorks |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/" title="SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries">
+  <strong>上一篇：</strong><br/>
+  <span>
+  SQLi--PART II:Bypassing Login pages on websites using SQL injectable queries</span>
+</a>
+</div>
+
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Finding-your-dorks"><span class="toc-number">2.</span> <span class="toc-text">Step1: Finding your dorks</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-compiled-by-kobez"><span class="toc-number">2.1.</span> <span class="toc-text">Dork List compiled by kobez-</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-by-Sidesipe"><span class="toc-number">2.2.</span> <span class="toc-text">Dork List by Sidesipe-</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dork-List-by-Newsletter’"><span class="toc-number">2.3.</span> <span class="toc-text">Dork List by .Newsletter’</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Making-use-of-your-Dorks-with-the-help-of-Google"><span class="toc-number">3.</span> <span class="toc-text">Step2: Making use of your Dorks with the help of Google</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-Vulnerability-approach"><span class="toc-number">4.</span> <span class="toc-text">Step3: Vulnerability approach</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extra-Notes-Hunting-for-specific-websites-with-specific-domains"><span class="toc-number">5.</span> <span class="toc-text">Extra Notes: Hunting for specific websites with specific domains</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Some-resource"><span class="toc-number">6.</span> <span class="toc-text">Some resource</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>

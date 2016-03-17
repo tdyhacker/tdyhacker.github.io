@@ -2,9 +2,86 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://sec.php101.cn/2016/03/17/test/</loc>
+    <loc>http://sec.php101.cn/2015/11/09/How-To-Steal-Cookies/</loc>
     
-    <lastmod>2016-03-17T08:19:20.000Z</lastmod>
+    <lastmod>2016-03-17T08:46:36.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/12/03/hash-types/</loc>
+    
+    <lastmod>2016-03-17T08:46:29.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2015/11/06/Enable-SSH-ON-Kali/</loc>
+    
+    <lastmod>2016-03-17T08:46:09.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/12/10/Cross-Site-Scripting-(XSS)-in-Plain-English/</loc>
+    
+    <lastmod>2016-03-17T08:45:54.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2015/11/13/The-Main-Points-of-Penetration-Testing-Methodology/</loc>
+    
+    <lastmod>2016-03-17T08:45:26.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/11/10/SQLi--PART-VString-Based-SQL-injection/</loc>
+    
+    <lastmod>2016-03-17T08:39:55.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/12/02/SQLi--PART-VIITime-Based-Blind-Injection/</loc>
+    
+    <lastmod>2016-03-17T08:39:50.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/11/28/SQLi--PART-VIBoolean-Based-Blind-Injection/</loc>
+    
+    <lastmod>2016-03-17T08:39:40.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/</loc>
+    
+    <lastmod>2016-03-17T08:39:33.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/11/01/SQLi--PART-IIIUnion-BasedNormal-SQL-injection/</loc>
+    
+    <lastmod>2016-03-17T08:39:25.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/</loc>
+    
+    <lastmod>2016-03-17T08:39:17.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/10/30/SQLi--PART%20I:Dorks/</loc>
+    
+    <lastmod>2016-03-17T08:38:25.000Z</lastmod>
     
   </url>
   

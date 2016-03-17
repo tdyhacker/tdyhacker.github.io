@@ -1,0 +1,582 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Ultimate Hash Types |     tudouya&#39;s secblog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="tudouya">
+    
+    <meta name="description" content="DES(Unix)
+Example: IvS7aeT4NzQPM
+Used in Linux and other similar OS.
+Length: 13 characters.
+Description: The first two characters are the salt (random">
+    
+    
+    
+    
+    <link rel="alternative" href="/atom.xml" title="    tudouya&#39;s secblog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="//cdn.bootcss.com/highlight.js/9.1.0/styles/railscasts.min.css" rel="stylesheet">
+    <style type="text/css">
+      figure {
+        overflow-x: auto;
+      }
+    </style>
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="    tudouya&#39;s secblog">    tudouya&#39;s secblog</a></h1>
+				<h2 class="blog-motto">~The quieter you become,the more you can hear~</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/sitemap.xml">sitemap</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:sec.php101.cn">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-12-02T17:24:50.000Z" itemprop="datePublished">
+      <a href="/2014/12/03/hash-types/" title="Ultimate Hash Types" itemprop="url" class="article-time">2014-12-03</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/12/03/hash-types/" title="Ultimate Hash Types" itemprop="url"><span>Ultimate Hash Types</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#DES-Unix"><span class="toc-number">1.</span> <span class="toc-text">DES(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Domain-Cached-Credentials"><span class="toc-number">2.</span> <span class="toc-text">Domain Cached Credentials</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-Unix"><span class="toc-number">3.</span> <span class="toc-text">MD5(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-APR"><span class="toc-number">4.</span> <span class="toc-text">MD5(APR)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-phpBB3"><span class="toc-number">5.</span> <span class="toc-text">MD5(phpBB3)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-Wordpress"><span class="toc-number">6.</span> <span class="toc-text">MD5(Wordpress)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL"><span class="toc-number">7.</span> <span class="toc-text">MySQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL5"><span class="toc-number">8.</span> <span class="toc-text">MySQL5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAdmin-v2-x"><span class="toc-number">9.</span> <span class="toc-text">RAdmin v2.x</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5"><span class="toc-number">10.</span> <span class="toc-text">MD5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-pass-salt"><span class="toc-number">11.</span> <span class="toc-text">md5($pass.$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-pass"><span class="toc-number">12.</span> <span class="toc-text">md5($salt.$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-pass"><span class="toc-number">13.</span> <span class="toc-text">md5(md5($pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-pass-salt"><span class="toc-number">14.</span> <span class="toc-text">md5(md5($pass).$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-salt-md5-pass"><span class="toc-number">15.</span> <span class="toc-text">md5(md5($salt).md5($pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-salt-pass"><span class="toc-number">16.</span> <span class="toc-text">md5(md5($salt).$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-pass-salt"><span class="toc-number">17.</span> <span class="toc-text">md5($salt.$pass.$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-md5-salt-pass"><span class="toc-number">18.</span> <span class="toc-text">md5($salt.md5($salt.$pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-1"><span class="toc-number">19.</span> <span class="toc-text">SHA-1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sha1-strtolower-username-pass"><span class="toc-number">20.</span> <span class="toc-text">sha1(strtolower($username).$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sha1-salt-sha1-salt-sha1-pass"><span class="toc-number">21.</span> <span class="toc-text">sha1($salt.sha1($salt.sha1($pass)))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-256-Unix"><span class="toc-number">22.</span> <span class="toc-text">SHA-256(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-512-Unix"><span class="toc-number">23.</span> <span class="toc-text">SHA-512(Unix)</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="DES-Unix"><a href="#DES-Unix" class="headerlink" title="DES(Unix)"></a>DES(Unix)</h2><ul>
+<li>Example: IvS7aeT4NzQPM</li>
+<li>Used in Linux and other similar OS.</li>
+<li>Length: 13 characters.</li>
+<li>Description: The first two characters are the salt (random characters; in our  example the salt is the string “Iv”), then there follows the actual hash.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="Domain-Cached-Credentials"><a href="#Domain-Cached-Credentials" class="headerlink" title="Domain Cached Credentials"></a>Domain Cached Credentials</h2><ul>
+<li>Example: Admin:b474d48cdfc4974d86ef4d24904cdd91</li>
+<li>Used for caching passwords of Windows domain.</li>
+<li>Length: 16 bytes.</li>
+<li>Algorithm: MD4(MD4(Unicode($pass)).Unicode(strtolower($username)))</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="MD5-Unix"><a href="#MD5-Unix" class="headerlink" title="MD5(Unix)"></a>MD5(Unix)</h2><ul>
+<li>Example: $1$12345678$XM4P3PrKBgKNnTaqG9P0T/</li>
+<li>Used in Linux and other similar OS.</li>
+<li>Length: 34 characters.</li>
+<li>Description: The hash begins with the $1$ signature, then there goes the salt (up to 8 random characters; in our example the salt is the string “12345678”), then there goes one more $ character, followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the MD5 algorithm 2000 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="MD5-APR"><a href="#MD5-APR" class="headerlink" title="MD5(APR)"></a>MD5(APR)</h2><ul>
+<li>Example: $apr1$12345678$auQSX8Mvzt.tdBi4y6Xgj.</li>
+<li>Used in Linux and other similar OS.</li>
+<li>Length: 37 characters.</li>
+<li>Description: The hash begins with the $apr1$ signature, then there goes the salt (up to 8 random characters; in our example the salt is the string “12345678”), then there goes one more $ character, followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the MD5 algorithm 2000 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="MD5-phpBB3"><a href="#MD5-phpBB3" class="headerlink" title="MD5(phpBB3)"></a>MD5(phpBB3)</h2><ul>
+<li>Example: $H$9123456785DAERgALpsri.D9z3ht120</li>
+<li>Used in phpBB 3.x.x.</li>
+<li>Length: 34 characters.</li>
+<li>Description: The hash begins with the $H$ signature, then there goes one character (most often the number ‘9’), then there goes the salt (8 random characters; in our example the salt is the string “12345678”), followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the MD5 algorithm 2048 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="MD5-Wordpress"><a href="#MD5-Wordpress" class="headerlink" title="MD5(Wordpress)"></a>MD5(Wordpress)</h2><ul>
+<li>Example: $P$B123456780BhGFYSlUqGyE6ErKErL01</li>
+<li>Used in Wordpress.</li>
+<li>Length: 34 characters.</li>
+<li>Description: The hash begins with the $P$ signature, then there goes one character (most often the number ‘B’), then there goes the salt (8 random characters; in our example the salt is the string “12345678”), followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the MD5 algorithm 8192 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h2><ul>
+<li>Example: 606717496665bcba</li>
+<li>Used in the old versions of MySQL.</li>
+<li>Length: 8 bytes.</li>
+<li>Description: The hash consists of two DWORDs, each not exceeding the value of 0x7fffffff.</li>
+</ul>
+<h2 id="MySQL5"><a href="#MySQL5" class="headerlink" title="MySQL5"></a>MySQL5</h2><ul>
+<li>Example: *E6CC90B878B948C35E92B003C792C46C58C4AF40</li>
+<li>Used in the new versions of MySQL.</li>
+<li>Length: 20 bytes.</li>
+<li>Algorithm: SHA-1(SHA-1($pass))</li>
+<li>Note: The hashes are to be loaded to the program without the asterisk that stands in the beginning of each hash.</li>
+</ul>
+<h2 id="RAdmin-v2-x"><a href="#RAdmin-v2-x" class="headerlink" title="RAdmin v2.x"></a>RAdmin v2.x</h2><ul>
+<li>Example: 5e32cceaafed5cc80866737dfb212d7f</li>
+<li>Used in the application Remote Administrator v2.x.</li>
+<li>Length: 16 bytes.</li>
+<li>Algorithm: The password is padded with zeros to the length of 100 bytes, then that * entire string is hashed with the MD5 algorithm.</li>
+</ul>
+<h2 id="MD5"><a href="#MD5" class="headerlink" title="MD5"></a>MD5</h2><ul>
+<li>Example: c4ca4238a0b923820dcc509a6f75849b</li>
+<li>Used in phpBB v2.x, Joomla version below 1.0.13 and many other forums and CMS.</li>
+<li>Length: 16 bytes.</li>
+<li>Algorithm: Same as the md5() function in PHP.</li>
+</ul>
+<h2 id="md5-pass-salt"><a href="#md5-pass-salt" class="headerlink" title="md5($pass.$salt)"></a>md5($pass.$salt)</h2><ul>
+<li>Example: 6f04f0d75f6870858bae14ac0b6d9f73:1234</li>
+<li>Used in WB News, Joomla version 1.0.13 and higher.</li>
+<li>Length: 16 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="md5-salt-pass"><a href="#md5-salt-pass" class="headerlink" title="md5($salt.$pass)"></a>md5($salt.$pass)</h2><ul>
+<li>Example: f190ce9ac8445d249747cab7be43f7d5:12</li>
+<li>Used in osCommerce, AEF, Gallery and other CMS.</li>
+<li>Length: 16 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="md5-md5-pass"><a href="#md5-md5-pass" class="headerlink" title="md5(md5($pass))"></a>md5(md5($pass))</h2><ul>
+<li>Example: 28c8edde3d61a0411511d3b1866f0636</li>
+<li>Used in e107, DLE, AVE, Diferior, Koobi and other CMS.</li>
+<li>Length: 16 bytes.</li>
+</ul>
+<h2 id="md5-md5-pass-salt"><a href="#md5-md5-pass-salt" class="headerlink" title="md5(md5($pass).$salt)"></a>md5(md5($pass).$salt)</h2><ul>
+<li>Example: 6011527690eddca23580955c216b1fd2:wQ6</li>
+<li>Used in vBulletin, IceBB.</li>
+<li>Length: 16 bytes.</li>
+<li>Notes: [1] [3] [4]</li>
+</ul>
+<h2 id="md5-md5-salt-md5-pass"><a href="#md5-md5-salt-md5-pass" class="headerlink" title="md5(md5($salt).md5($pass))"></a>md5(md5($salt).md5($pass))</h2><ul>
+<li>Example: 81f87275dd805aa018df8befe09fe9f8:wH6_S</li>
+<li>Used in IPB.</li>
+<li>Length: 16 bytes.</li>
+<li>Notes: [1] [3]</li>
+</ul>
+<h2 id="md5-md5-salt-pass"><a href="#md5-md5-salt-pass" class="headerlink" title="md5(md5($salt).$pass)"></a>md5(md5($salt).$pass)</h2><ul>
+<li>Example: 816a14db44578f516cbaef25bd8d8296:1234</li>
+<li>Used in MyBB.</li>
+<li>Length: 16 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="md5-salt-pass-salt"><a href="#md5-salt-pass-salt" class="headerlink" title="md5($salt.$pass.$salt)"></a>md5($salt.$pass.$salt)</h2><ul>
+<li>Example: a3bc9e11fddf4fef4deea11e33668eab:1234</li>
+<li>Used in TBDev.</li>
+<li>Length: 16 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="md5-salt-md5-salt-pass"><a href="#md5-salt-md5-salt-pass" class="headerlink" title="md5($salt.md5($salt.$pass))"></a>md5($salt.md5($salt.$pass))</h2><ul>
+<li>Example: 1d715e52285e5a6b546e442792652c8a:1234</li>
+<li>Used in DLP.</li>
+<li>Length: 16 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="SHA-1"><a href="#SHA-1" class="headerlink" title="SHA-1"></a>SHA-1</h2><ul>
+<li>Example: 356a192b7913b04c54574d18c28d46e6395428ab</li>
+<li>Used in many forums and CMS.</li>
+<li>Length: 20 bytes.</li>
+<li>Algorithm: Same as the sha1() function in PHP.</li>
+</ul>
+<h2 id="sha1-strtolower-username-pass"><a href="#sha1-strtolower-username-pass" class="headerlink" title="sha1(strtolower($username).$pass)"></a>sha1(strtolower($username).$pass)</h2><ul>
+<li>Example: Admin:6c7ca345f63f835cb353ff15bd6c5e052ec08e7a</li>
+<li>Used in SMF.</li>
+<li>Length: 20 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="sha1-salt-sha1-salt-sha1-pass"><a href="#sha1-salt-sha1-salt-sha1-pass" class="headerlink" title="sha1($salt.sha1($salt.sha1($pass)))"></a>sha1($salt.sha1($salt.sha1($pass)))</h2><ul>
+<li>Example: cd37bfbf68d198d11d39a67158c0c9cddf34573b:1234</li>
+<li>Used in Woltlab BB.</li>
+<li>Length: 20 bytes.</li>
+<li>Note: [1]</li>
+</ul>
+<h2 id="SHA-256-Unix"><a href="#SHA-256-Unix" class="headerlink" title="SHA-256(Unix)"></a>SHA-256(Unix)</h2><ul>
+<li>Example: $5$12345678$jBWLgeYZbSvREnuBr5s3gp13vqi</li>
+<li>Used in Linux and other similar OS.</li>
+<li>Length: 55 characters.</li>
+<li>Description: The hash begins with the $5$ signature, then there goes the salt (up to 8 random characters; in our example the salt is the string “12345678”), then there goes one more $ character, followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the SHA-256 algorithm 5000 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<h2 id="SHA-512-Unix"><a href="#SHA-512-Unix" class="headerlink" title="SHA-512(Unix)"></a>SHA-512(Unix)</h2><ul>
+<li>Example: $6$12345678$U6Yv5E1lWn6mEESzKen42o6rbEm</li>
+<li>Used in Linux and other similar OS.</li>
+<li>Length: 98 characters.</li>
+<li>Description: The hash begins with the $6$ signature, then there goes the salt (up to 8 random characters; in our example the salt is the string “12345678”), then there goes one more $ character, followed by the actual hash.</li>
+<li>Algorithm: Actually that is a loop calling the SHA-512 algorithm 5000 times.</li>
+<li>Notes: [1] [2]</li>
+</ul>
+<hr>
+<p>Notes:</p>
+<p>[1] Since the hashing requires not only a password but also a salt (or a user name), which is unique for each user, the attack speed for such hashes will decline proportionally to their count (for example, attacking 100 hashes will go 100 times slower than attacking one hash).</p>
+<p>[2] The hash is to be loaded to the program in full, to the “Hash” column - the program will automatically extract the salt and other required data from it.</p>
+<p>[3] The ‘:’ character can be used as salt; however, since it is used by default for separating hash and salt in PasswordsPro, it is recommended that you use a different character for separating fields; e.g., space.</p>
+<p>[4] Salt can contain special characters - single or double quotes, as well as backslash, which are preceded (after obtaining dumps from MySQL databases) by an additional backslash, which is to be removed manually. For example, the salt to be loaded to the program would be a’4 instead of a\’4, as well as the salts a”4 instead of a\”4 and a\4 instead of a\4.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Z-Other/">Z-Other</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/hash/">hash</a><a href="/tags/crypt/">crypt</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://sec.php101.cn/2014/12/03/hash-types/" data-title="Ultimate Hash Types |     tudouya&#39;s secblog" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/12/10/Cross-Site-Scripting-(XSS)-in-Plain-English/" title="Cross-Site Scripting (XSS) in Plain English">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Cross-Site Scripting (XSS) in Plain English</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/12/02/SQLi--PART-VIITime-Based-Blind-Injection/"  title="SQLi--PART VII:Time Based Blind Injection">
+ <strong>下一篇：</strong><br/> 
+ <span>SQLi--PART VII:Time Based Blind Injection
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread"></div>
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#DES-Unix"><span class="toc-number">1.</span> <span class="toc-text">DES(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Domain-Cached-Credentials"><span class="toc-number">2.</span> <span class="toc-text">Domain Cached Credentials</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-Unix"><span class="toc-number">3.</span> <span class="toc-text">MD5(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-APR"><span class="toc-number">4.</span> <span class="toc-text">MD5(APR)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-phpBB3"><span class="toc-number">5.</span> <span class="toc-text">MD5(phpBB3)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5-Wordpress"><span class="toc-number">6.</span> <span class="toc-text">MD5(Wordpress)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL"><span class="toc-number">7.</span> <span class="toc-text">MySQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL5"><span class="toc-number">8.</span> <span class="toc-text">MySQL5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAdmin-v2-x"><span class="toc-number">9.</span> <span class="toc-text">RAdmin v2.x</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MD5"><span class="toc-number">10.</span> <span class="toc-text">MD5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-pass-salt"><span class="toc-number">11.</span> <span class="toc-text">md5($pass.$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-pass"><span class="toc-number">12.</span> <span class="toc-text">md5($salt.$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-pass"><span class="toc-number">13.</span> <span class="toc-text">md5(md5($pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-pass-salt"><span class="toc-number">14.</span> <span class="toc-text">md5(md5($pass).$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-salt-md5-pass"><span class="toc-number">15.</span> <span class="toc-text">md5(md5($salt).md5($pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-md5-salt-pass"><span class="toc-number">16.</span> <span class="toc-text">md5(md5($salt).$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-pass-salt"><span class="toc-number">17.</span> <span class="toc-text">md5($salt.$pass.$salt)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#md5-salt-md5-salt-pass"><span class="toc-number">18.</span> <span class="toc-text">md5($salt.md5($salt.$pass))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-1"><span class="toc-number">19.</span> <span class="toc-text">SHA-1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sha1-strtolower-username-pass"><span class="toc-number">20.</span> <span class="toc-text">sha1(strtolower($username).$pass)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sha1-salt-sha1-salt-sha1-pass"><span class="toc-number">21.</span> <span class="toc-text">sha1($salt.sha1($salt.sha1($pass)))</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-256-Unix"><span class="toc-number">22.</span> <span class="toc-text">SHA-256(Unix)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SHA-512-Unix"><span class="toc-number">23.</span> <span class="toc-text">SHA-512(Unix)</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/A-SQLi/" title="A-SQLi">A-SQLi<sup>7</sup></a></li>
+		
+			<li><a href="/categories/B-XSS/" title="B-XSS">B-XSS<sup>2</sup></a></li>
+		
+			<li><a href="/categories/H-AttackFlow/" title="H-AttackFlow">H-AttackFlow<sup>1</sup></a></li>
+		
+			<li><a href="/categories/T-Tools/" title="T-Tools">T-Tools<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Z-Other/" title="Z-Other">Z-Other<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Blind/" title="Blind">Blind<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Boolean-Based/" title="Boolean Based">Boolean Based<sup>2</sup></a></li>
+		
+			<li><a href="/tags/Dork/" title="Dork">Dork<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Double-Query/" title="Double Query">Double Query<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Error-Based/" title="Error Based">Error Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/MegaSQLi/" title="MegaSQLi">MegaSQLi<sup>4</sup></a></li>
+		
+			<li><a href="/tags/String-Based/" title="String Based">String Based<sup>1</sup></a></li>
+		
+			<li><a href="/tags/crypt/" title="crypt">crypt<sup>1</sup></a></li>
+		
+			<li><a href="/tags/hash/" title="hash">hash<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+<div>
+<br />
+</div>
+
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/5050395856" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/tudouya" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:568865013@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            keep foolish~keep hungry
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			～如果我们不选择堕落，那么地狱的存在还有什么意义～
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/RagingCat/hexo-theme-ragingcat" target="_blank" title="hexo-theme-ragingcat">Raging Cat</a> © 2016
+		
+		<a href="http://sec.php101.cn/about" target="_blank" title="tudouya">tudouya</a>
+		
+		</p>
+</div></footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"ragingcat"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<style type="text/css">
+</style>
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script type="text/javascript">
+$(document).ready(function(){
+    $('pre').each(function(i, block) {
+      hljs.highlightBlock(block);
+    });
+    $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60243036-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>
