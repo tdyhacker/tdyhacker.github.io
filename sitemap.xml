@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://sec.php101.cn/2014/11/01/SQLi--PART-IIIUnion-BasedNormal-SQL-injection/</loc>
+    
+    <lastmod>2016-10-25T11:55:36.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://sec.php101.cn/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/</loc>
+    
+    <lastmod>2016-10-25T10:29:18.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://sec.php101.cn/2014/10/30/SQLi--PART%20I:Dorks/</loc>
     
     <lastmod>2016-10-25T08:00:28.000Z</lastmod>
@@ -68,20 +82,6 @@
     <loc>http://sec.php101.cn/2014/11/10/SQLi--PART-IVError-BasedDouble-Query-SQL-injection/</loc>
     
     <lastmod>2016-03-17T08:39:33.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://sec.php101.cn/2014/11/01/SQLi--PART-IIIUnion-BasedNormal-SQL-injection/</loc>
-    
-    <lastmod>2016-03-17T08:39:25.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://sec.php101.cn/2014/10/30/SQLi--PART-IIBypassing-Login-pages-on-websites-using-SQL-injectable-queries/</loc>
-    
-    <lastmod>2016-03-17T08:39:17.000Z</lastmod>
     
   </url>
   
